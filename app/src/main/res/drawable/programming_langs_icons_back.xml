@@ -4,9 +4,7 @@
     android:height="1920dp"
     android:viewportWidth="1080"
     android:viewportHeight="1920">
-  <path
-      android:pathData="M0,0h1080v1920h-1080z"
-      android:fillColor="#fff"/>
+
   <path
       android:pathData="m629.7,97.9l142.5,37.2 -37.2,142.5 -142.5,-37.2 37.2,-142.5Z"
       android:strokeAlpha="0.75"

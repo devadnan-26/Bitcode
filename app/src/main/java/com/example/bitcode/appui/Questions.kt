@@ -71,7 +71,6 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.RenderMode
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.bitcode.R
 import com.example.bitcode.TinyDB
@@ -83,23 +82,7 @@ import org.json.JSONObject
 
 class Questions : ComponentActivity() {
 
-    override fun onPause() {
-        super.onPause()
-        Log.d("Questions", "Called OnPaused")
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.d("Questions", "Called OnRestart")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("Questions", "Called OnResume")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("Questions", "Called OnCreate")
         super.onCreate(savedInstanceState)
         setContent {
             BitcodeTheme {
@@ -262,7 +245,7 @@ fun Start(navController: NavController?) {
             Text(
                 text = stringResource(id = R.string.start_message),
                 fontFamily = FontFamily(Font(R.font.arvo_bold)),
-                fontSize = 36.sp,
+                fontSize = 24.sp,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
                 lineHeight = 48.sp,
@@ -287,9 +270,9 @@ fun Start(navController: NavController?) {
                 Text(
                     text = stringResource(id = R.string.get_started),
                     fontFamily = FontFamily(Font(R.font.arvo_bold)),
-                    fontSize = dpToSp(dp = 20.dp),
+                    fontSize = dpToSp(dp = 18.dp),
                     color = Color.White,
-                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
+                    modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
         }
@@ -300,7 +283,7 @@ fun Start(navController: NavController?) {
 fun Question(
     list: List<Choices?>?, context: ComponentActivity?
 ) {
-    val viewModel = ViewModelProvider(context!!)[PlatformViewModel::class.java]
+    val viewModel = context?.let { ViewModelProvider(it) }?.get(PlatformViewModel::class.java)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
@@ -316,10 +299,12 @@ fun Question(
             val json = JSONObject()
             var letsGoButtonText by remember {
                 mutableStateOf(
-                    getString(
-                        context,
-                        R.string.lets_go
-                    )
+                    context?.let { it1 ->
+                        getString(
+                            it1,
+                            R.string.lets_go
+                        )
+                    }
                 )
             }
             val (question, fieldTitle, answer, buttonLetsGo, icon, buttonSubmit, ok, okMessage) = createRefs()
@@ -397,7 +382,7 @@ fun Question(
                             SpanStyle(
                                 color = Color.Black,
                                 fontFamily = FontFamily(Font(R.font.arvo_bold)),
-                                fontSize = 48.sp
+                                fontSize = 36.sp
                             )
                         ) {
                             append(fields[fieldsIterator])
@@ -418,13 +403,15 @@ fun Question(
                     val letters = listOf("A", "B", "C")
                     var iterator = 0
                     list?.get(i)?.answers?.forEach { answer ->
-                        Choice(
-                            choice = answer,
-                            modifier = Modifier,
-                            letter = letters[iterator],
-                            viewModel,
-                            context
-                        )
+                        if (viewModel != null) {
+                            Choice(
+                                choice = answer,
+                                modifier = Modifier,
+                                letter = letters[iterator],
+                                viewModel,
+                                context
+                            )
+                        }
                         if (iterator < 2) iterator++
                     }
                 }
@@ -439,7 +426,7 @@ fun Question(
 
                         val jsonObject = JSONObject()
                         val query = list?.get(i)?.question
-                        val chosenAnswer = viewModel.whichChosen()
+                        val chosenAnswer = viewModel?.whichChosen()
                             ?.let { it1 -> list?.get(i)?.answers?.get(it1) }
                         if (chosenAnswer == null) {
                             scope.launch {
@@ -466,9 +453,9 @@ fun Question(
                     Text(
                         text = stringResource(id = R.string.submit),
                         fontFamily = FontFamily(Font(R.font.arvo_bold)),
-                        fontSize = dpToSp(dp = 20.dp),
+                        fontSize = dpToSp(dp = 18.dp),
                         color = Color.White,
-                        modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
                 }
             }
@@ -481,21 +468,23 @@ fun Question(
                     onClick = {
                         if (fieldsIterator < 6) fieldsIterator++; if (i < 19) i++
                         if (fieldsIterator == 6) {
-                            if (letsGoButtonText != getString(context, R.string.get_started))
-                                letsGoButtonText = getString(context, R.string.get_started)
+                            if (letsGoButtonText != context?.let { it1 -> getString(it1, R.string.get_started) })
+                                letsGoButtonText = context?.let { it1 -> getString(it1, R.string.get_started) }
                             else {
-                                TinyDB(context).putObject("JSON-Answers", json)
-                                context.getSharedPreferences("Bitcode", Context.MODE_PRIVATE).edit()
-                                    .putBoolean("questions_shown", true).apply()
-                                context.startActivity(Intent(context, Platform::class.java))
-                                context.finish()
+                                if (context != null) {
+                                    TinyDB(context).putObject("JSON-Answers", json)
+                                }
+                                context?.getSharedPreferences("Bitcode", Context.MODE_PRIVATE)?.edit()
+                                    ?.putBoolean("questions_shown", true)?.apply()
+                                context?.startActivity(Intent(context, Platform::class.java))
+                                context?.finish()
                             }
 
                         } else {
                             if (fieldsIterator != 0) {
-                                json.put(fields[(fieldsIterator - 1)], viewModel.array.value)
+                                json.put(fields[(fieldsIterator - 1)], viewModel?.array?.value)
                                 Log.d("JSON", json.toString())
-                                viewModel.resetArray()
+                                viewModel?.resetArray()
                             }
                         }
                     }, shape = RoundedCornerShape(50.dp), colors = ButtonDefaults.buttonColors(
@@ -504,13 +493,15 @@ fun Question(
                         .padding(horizontal = 24.dp)
                         .wrapContentWidth()
                 ) {
-                    Text(
-                        text = letsGoButtonText,
-                        fontFamily = FontFamily(Font(R.font.arvo_bold)),
-                        fontSize = dpToSp(dp = 20.dp),
-                        color = Color.White,
-                        modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
-                    )
+                    letsGoButtonText?.let { it1 ->
+                        Text(
+                            text = it1,
+                            fontFamily = FontFamily(Font(R.font.arvo_bold)),
+                            fontSize = dpToSp(dp = 18.dp),
+                            color = Color.White,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
                 }
             }
             AnimatedVisibility(visible = (list?.get(i) != null),
@@ -603,6 +594,14 @@ fun Choice(
 fun QuestionPreview() {
     BitcodeTheme {
         Question(list = null, null)
+    }
+}
+
+@Composable
+@Preview
+fun StartPreview() {
+    BitcodeTheme {
+        Start(navController = null)
     }
 }
 

@@ -11,8 +11,8 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDp
@@ -21,6 +21,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,8 +68,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -104,17 +106,16 @@ class MainActivity : ComponentActivity() {
         Log.d("Bitcode", "OnCreate Created")
         setContent {
 
-            if(SDK_INT >= Build.VERSION_CODES.R) {
+            if (SDK_INT >= Build.VERSION_CODES.R) {
                 val controller = window.insetsController
 
                 // Hide both the status bar and the navigation bar
                 controller?.let {
                     it.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                    it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    it.systemBarsBehavior =
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 }
-            }
-
-            else {
+            } else {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 window.setFlags(
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
@@ -128,8 +129,8 @@ class MainActivity : ComponentActivity() {
                 NavHost(
                     navController = navController,
                     startDestination = "splash_screen",
-                    enterTransition = { EnterTransition.None },
-                    exitTransition = { ExitTransition.None }
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
                 )
                 {
                     composable("splash_screen") { First(this@MainActivity, navController) }
@@ -238,147 +239,211 @@ fun SplashFirst(navController: NavController?) {
         ) {
 
             val (decorDown, decorUp, atom, next, icon, text1, text2) = createRefs()
+
+            var text1Visibility by remember { mutableStateOf(false) }
+            var text2Visibility by remember { mutableStateOf(false) }
+            var atomVisibility by remember { mutableStateOf(false) }
+            var decor1Visibility by remember { mutableStateOf(false) }
+            var decor2Visibility by remember { mutableStateOf(false) }
+            var buttonVisibility by remember { mutableStateOf(false) }
+            var iconVisibility by remember { mutableStateOf(false) }
+            var pressed by remember { mutableStateOf(false) }
+
             val density = LocalDensity.current.density
+
             var originalX by remember { mutableFloatStateOf(0f) }
             var originalY by remember { mutableFloatStateOf(0f) }
+
             val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.atom))
 
-            LottieAnimation(
-                modifier = Modifier
-                    .size(
-                        (356.68 * getScreenSize().width / 430).dp,
-                        ((385.12 * getScreenSize().height / 932)).dp
-                    )
-                    .constrainAs(atom) {
+            AnimatedVisibility(
+                visible = atomVisibility,
+                modifier = Modifier.constrainAs(atom) {
+                    centerHorizontallyTo(parent)
+                    centerVerticallyTo(parent, bias = 0.53f)
+                },
+                enter = fadeIn(),
+            ) {
+
+                LottieAnimation(
+                    modifier = Modifier
+                        .size(
+                            (356.68 * getScreenSize().width / 430).dp,
+                            ((385.12 * getScreenSize().height / 932)).dp
+                        )
+
+                        .onGloballyPositioned { coordinates ->
+                            val xInDp = (coordinates.positionInRoot().x / density).dp
+                            val yInDp = (coordinates.positionInRoot().y / density).dp
+                            originalX = xInDp.value
+                            originalY = yInDp.value
+                            Log.d("dimension", "x: ${originalX.dp}, y: ${originalY.dp}")
+                        }
+                        .alpha(0.5f),
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                )
+            }
+
+            AnimatedVisibility(
+                visible = iconVisibility, modifier = Modifier
+                    .constrainAs(icon) {
                         centerHorizontallyTo(parent)
-                        linkTo(decorUp.bottom, decorDown.top, bias = 0.50f)
-                    }
+                        top.linkTo(parent.top, margin = 16.dp)
+                    },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+
+                Row(modifier = Modifier
                     .onGloballyPositioned { coordinates ->
                         val xInDp = (coordinates.positionInRoot().x / density).dp
                         val yInDp = (coordinates.positionInRoot().y / density).dp
                         originalX = xInDp.value
                         originalY = yInDp.value
                         Log.d("dimension", "x: ${originalX.dp}, y: ${originalY.dp}")
-                    }
-                    .alpha(0.5f),
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-
-            Row(modifier = Modifier.constrainAs(icon) {
-                centerHorizontallyTo(parent)
-                top.linkTo(parent.top, margin = 16.dp)
-            }
-                .onGloballyPositioned { coordinates ->
-                    val xInDp = (coordinates.positionInRoot().x / density).dp
-                    val yInDp = (coordinates.positionInRoot().y / density).dp
-                    originalX = xInDp.value
-                    originalY = yInDp.value
-                    Log.d("dimension", "x: ${originalX.dp}, y: ${originalY.dp}")
-                    Log.d("dimension", "coordinates: ${coordinates.size}")
-                }) {
-                Image(
-                    painter = painterResource(id = R.drawable.bitcode_icon),
-                    contentDescription = null,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(72.dp)
-                )
-                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.bitcode),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(115.09.dp, 23.35.dp)
-                )
-            }
-
-            Image(
-                painter = painterResource(id = R.drawable.decor_down),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(
-                        (135.65 * getScreenSize().width / 430).dp,
-                        ((151.86 * getScreenSize().height / 932) + 30).dp
+                        Log.d("dimension", "coordinates: ${coordinates.size}")
+                    }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.bitcode_icon),
+                        contentDescription = null,
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .size(72.dp)
                     )
-                    .constrainAs(decorDown) {
-                        start.linkTo(parent.start)
-                        centerVerticallyTo(parent, bias = 0.9f)
+                    Spacer(modifier = Modifier.padding(end = 8.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.bitcode),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .size(115.09.dp, 23.35.dp)
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = decor2Visibility,
+                modifier = Modifier.constrainAs(decorDown) {
+                    start.linkTo(parent.start)
+                    centerVerticallyTo(parent, bias = 0.9f)
+                },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.decor_down),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(
+                            (135.65 * getScreenSize().width / 430).dp,
+                            ((151.86 * getScreenSize().height / 932) + 30).dp
+                        )
+                )
+            }
+
+            AnimatedVisibility(
+                visible = decor1Visibility,
+                modifier = Modifier.constrainAs(decorUp) {
+                    centerVerticallyTo(parent, bias = 0.13f)
+                    end.linkTo(parent.end)
+                },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+
+                Image(
+                    painter = painterResource(id = R.drawable.decor_up),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(
+                            ((155.74 * getScreenSize().width / 430)).dp,
+                            ((165.92 * getScreenSize().height / 932) + 30).dp
+                        )
+                )
+
+            }
+
+            LaunchedEffect(pressed) {
+                if (!pressed) {
+                    delay(2500)
+                    iconVisibility = true
+                    delay(1000)
+                    decor1Visibility = true
+                    decor2Visibility = true
+                    delay(1000)
+                    atomVisibility = true
+                    delay(750)
+                    text1Visibility = true
+                    delay(350)
+                    text2Visibility = true
+                    delay(1000)
+                    buttonVisibility = true
+                    delay(500)
+                } else {
+                    text1Visibility = false
+                    delay(350)
+                    text2Visibility = false
+                    delay(500)
+                    decor1Visibility = false
+                    decor2Visibility = false
+                    delay(250)
+                    navController?.navigate("splash_second")
+                }
+            }
+            AnimatedVisibility(
+                visible = buttonVisibility, modifier = Modifier.constrainAs(next) {
+                    bottom.linkTo(parent.bottom, margin = 24.dp)
+                    end.linkTo(parent.end, margin = 24.dp)
+                },
+                enter = fadeIn()
+            ) {
+                Button(
+                    onClick = {
+                        pressed = true
                     },
-            )
-
-            Image(painter = painterResource(id = R.drawable.decor_up),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(
-                        ((155.74 * getScreenSize().width / 430)).dp,
-                        ((165.92 * getScreenSize().height / 932) + 30).dp
-                    )
-                    .constrainAs(decorUp) {
-                        centerVerticallyTo(parent, bias = 0.13f)
-                        end.linkTo(parent.end)
-                    })
-
-            Button(onClick = { navController?.navigate("splash_second") },
-                shape = RoundedCornerShape(22.dp),
-                colors = ButtonDefaults.buttonColors(
-                    colorResource(R.color.app_green)
-                ),
-                modifier = Modifier
-                    .constrainAs(next) {
-                        bottom.linkTo(parent.bottom, margin = 24.dp)
-                        end.linkTo(parent.end, margin = 24.dp)
-                    }
-                    .defaultMinSize(minWidth = 96.dp, minHeight = 48.dp)
-                    .height(48.dp)) {
-                val imageLoaderRunning = ImageLoader.Builder(LocalContext.current).components {
-                    if (SDK_INT >= 28) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                }.build()
-
-                Image(
-                    painter = rememberAsyncImagePainter(R.drawable.running, imageLoaderRunning),
-                    contentScale = ContentScale.Fit,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp)
-                )
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                Icon(
-                    painter = painterResource(id = R.drawable.arrow),
-                    contentDescription = null,
-                )
-            }
-
-            Column(modifier = Modifier.constrainAs(text1) {
-                start.linkTo(parent.start, margin = 12.dp)
-                centerVerticallyTo(parent, bias = 0.30f)
-            }) {
-
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            SpanStyle(
-                                fontFamily = arvo_bold,
-                                fontSize = dpToSp(dp = 38.dp),
-                                color = Color.Black
-                            )
-                        ) {
-                            append(stringResource(id = R.string.text_splash_first_1_1))
+                    shape = RoundedCornerShape(22.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        colorResource(R.color.app_green)
+                    ),
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 96.dp, minHeight = 48.dp)
+                        .height(48.dp)
+                ) {
+                    val imageLoaderRunning = ImageLoader.Builder(LocalContext.current).components {
+                        if (SDK_INT >= 28) {
+                            add(ImageDecoderDecoder.Factory())
+                        } else {
+                            add(GifDecoder.Factory())
                         }
-                    },
-                    lineHeight = dpToSp(dp = 56.dp),
-                )
+                    }.build()
 
-                Spacer(modifier = Modifier.padding(4.dp))
+                    Image(
+                        painter = rememberAsyncImagePainter(R.drawable.running, imageLoaderRunning),
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
+                    )
 
-                Row {
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow),
+                        contentDescription = null,
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = text1Visibility,
+                modifier = Modifier.constrainAs(text1) {
+                    start.linkTo(parent.start, margin = 12.dp)
+                    centerVerticallyTo(parent, bias = 0.30f)
+                },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column {
 
                     Text(
                         text = buildAnnotatedString {
@@ -389,43 +454,70 @@ fun SplashFirst(navController: NavController?) {
                                     color = Color.Black
                                 )
                             ) {
-                                append(stringResource(id = R.string.text_splash_first_1_2))
+                                append(stringResource(id = R.string.text_splash_first_1_1))
                             }
                         },
-                        lineHeight = dpToSp(dp = 56.dp)
+                        lineHeight = dpToSp(dp = 56.dp),
                     )
 
                     Spacer(modifier = Modifier.padding(4.dp))
 
-                    Text(text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = arvo_bold,
-                                fontSize = dpToSp(dp = 38.dp),
-                                brush = Brush.linearGradient(
-                                    listOf(
-                                        Color(0xFF1FBBA8),
-                                        Color(0xFF65BD4D)
+                    Row {
+
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                        color = Color.Black
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_first_1_2))
+                                }
+                            },
+                            lineHeight = dpToSp(dp = 56.dp)
+                        )
+
+                        Spacer(modifier = Modifier.padding(4.dp))
+
+                        Text(text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontFamily = arvo_bold,
+                                    fontSize = dpToSp(dp = 38.dp),
+                                    brush = Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF1FBBA8),
+                                            Color(0xFF65BD4D)
+                                        )
                                     )
                                 )
-                            )
-                        ) {
-                            append(stringResource(id = R.string.text_splash_first_1_3))
-                        }
-                    })
+                            ) {
+                                append(stringResource(id = R.string.text_splash_first_1_3))
+                            }
+                        })
+                    }
                 }
             }
 
-            Text(
-                text = stringResource(id = R.string.text_splash_first_2),
-                fontFamily = arvo_bold,
-                fontSize = dpToSp(dp = 38.dp),
+            AnimatedVisibility(
+                visible = text2Visibility,
                 modifier = Modifier.constrainAs(text2) {
                     linkTo(text1.bottom, decorDown.top, bias = 0.85f)
                     start.linkTo(parent.start, margin = 12.dp)
                 },
-                lineHeight = dpToSp(dp = 56.dp)
-            )
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+
+                Text(
+                    text = stringResource(id = R.string.text_splash_first_2),
+                    fontFamily = arvo_bold,
+                    fontSize = dpToSp(dp = 38.dp),
+                    lineHeight = dpToSp(dp = 56.dp)
+                )
+            }
 
         }
     }
@@ -445,6 +537,10 @@ fun SplashSecond(navController: NavController?) {
             val (icon, next, text1, text2, atom) = createRefs()
             val infiniteTransitionJava = rememberInfiniteTransition(label = "")
 
+            var text1Visibility by remember { mutableStateOf(false) }
+            var text2Visibility by remember { mutableStateOf(false) }
+            var pressed by remember { mutableStateOf(false) }
+
             val animatedProgressJava by infiniteTransitionJava.animateFloat(
                 initialValue = 0f,
                 targetValue = 1f,
@@ -463,6 +559,22 @@ fun SplashSecond(navController: NavController?) {
                     repeatMode = RepeatMode.Restart
                 ), label = ""
             )
+
+            LaunchedEffect(pressed) {
+                if (!pressed) {
+                    delay(1000)
+                    text1Visibility = true
+                    delay(350)
+                    text2Visibility = true
+                    delay(1000)
+                } else {
+                    text1Visibility = false
+                    delay(350)
+                    text2Visibility = false
+                    delay(250)
+                    navController?.navigate("splash_third")
+                }
+            }
 
             with(LocalDensity.current) {
 
@@ -522,6 +634,7 @@ fun SplashSecond(navController: NavController?) {
 
                 val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.atom))
 
+
                 LottieAnimation(
                     modifier = Modifier
                         .size(
@@ -530,14 +643,14 @@ fun SplashSecond(navController: NavController?) {
                         )
                         .constrainAs(atom) {
                             centerHorizontallyTo(parent)
-                            centerVerticallyTo(parent, bias = 0.50f)
+                            centerVerticallyTo(parent, bias = 0.53f)
                         }
                         .alpha(0.5f),
                     composition = composition,
                     iterations = LottieConstants.IterateForever,
                 )
 
-                Button(onClick = { navController?.navigate("splash_third") },
+                Button(onClick = { pressed = true },
                     shape = RoundedCornerShape(22.dp),
                     colors = ButtonDefaults.buttonColors(
                         colorResource(R.color.app_green)
@@ -595,153 +708,169 @@ fun SplashSecond(navController: NavController?) {
                         }
                 )
 
-                Column(modifier = Modifier.constrainAs(text1) {
-                    linkTo(icon.bottom, parent.bottom, bias = 0.1f)
-                    start.linkTo(parent.start, margin = 12.dp)
-                }) {
+                AnimatedVisibility(
+                    visible = text1Visibility,
+                    modifier = Modifier.constrainAs(text1) {
+                        linkTo(icon.bottom, parent.bottom, bias = 0.1f)
+                        start.linkTo(parent.start, margin = 12.dp)
+                    },
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
 
-                    Row {
+                    Column {
 
-                        Text(text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_1_1))
-                            }
-                        })
+                        Row {
 
-                        Spacer(modifier = Modifier.padding(4.dp))
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_1_1))
+                                }
+                            })
 
-                        Text(text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                    brush = Brush.linearGradient(
-                                        listOf(
-                                            Color(0xFF1FBBA8),
-                                            Color(0xFF65BD4D)
+                            Spacer(modifier = Modifier.padding(4.dp))
+
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                        brush = Brush.linearGradient(
+                                            listOf(
+                                                Color(0xFF1FBBA8),
+                                                Color(0xFF65BD4D)
+                                            )
                                         )
                                     )
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_1_2))
-                            }
-                        })
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_1_2))
+                                }
+                            })
+
+                        }
+
+                        Text(
+                            text = stringResource(id = R.string.text_splash_second_1_3),
+                            style = TextStyle(
+                                color = Color.Black,
+                                fontSize = dpToSp(dp = 38.dp),
+                                fontFamily = arvo_bold
+                            ),
+                            lineHeight = dpToSp(dp = 56.dp)
+                        )
 
                     }
-
-                    Text(
-                        text = stringResource(id = R.string.text_splash_second_1_3),
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = dpToSp(dp = 38.dp),
-                            fontFamily = arvo_bold
-                        ),
-                        lineHeight = dpToSp(dp = 56.dp)
-                    )
-
                 }
 
-                Column(modifier = Modifier.constrainAs(text2) {
-                    centerVerticallyTo(parent, bias = 0.75f)
-                    start.linkTo(parent.start, margin = 12.dp)
-                }) {
+                AnimatedVisibility(
+                    visible = text2Visibility,
+                    modifier = Modifier.constrainAs(text2) {
+                        centerVerticallyTo(parent, bias = 0.75f)
+                        start.linkTo(parent.start, margin = 12.dp)
+                    },
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
 
-                    Row {
+                    Column {
 
-                        Text(text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_2_1))
-                            }
-                        })
+                        Row {
 
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        Text(text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                    brush = Brush.horizontalGradient(
-                                        colorStops = arrayOf(
-                                            0.5f to Color(0xFF3673A5),
-                                            0.5f to Color(0xFFFFD342)
-                                        ),
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
                                     )
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_2_2))
-                            }
-                        })
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_2_1))
+                                }
+                            })
+
+                            Spacer(modifier = Modifier.padding(4.dp))
+
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                        brush = Brush.horizontalGradient(
+                                            colorStops = arrayOf(
+                                                0.5f to Color(0xFF3673A5),
+                                                0.5f to Color(0xFFFFD342)
+                                            ),
+                                        )
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_2_2))
+                                }
+                            })
+
+                        }
+
+                        Row {
+
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_2_3))
+                                }
+                            })
+
+                            Spacer(modifier = Modifier.padding(4.dp))
+
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                        brush = Brush.verticalGradient(
+                                            colorStops = arrayOf(
+                                                0.48f to Color(0xFFF8981D),
+                                                0.48f to Color(0xFF5382A1)
+                                            ),
+                                        )
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_2_4))
+                                }
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontFamily = arvo_bold,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_2_5))
+                                }
+                            })
+
+                        }
+
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = Color.Black,
+                                        fontSize = dpToSp(dp = 38.dp),
+                                        fontFamily = arvo_bold
+                                    )
+                                ) {
+                                    append(stringResource(id = R.string.text_splash_second_2_6))
+                                }
+                            },
+                            lineHeight = dpToSp(dp = 56.dp)
+                        )
 
                     }
-
-                    Row {
-
-                        Text(text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_2_3))
-                            }
-                        })
-
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        Text(text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                    brush = Brush.verticalGradient(
-                                        colorStops = arrayOf(
-                                            0.48f to Color(0xFFF8981D),
-                                            0.48f to Color(0xFF5382A1)
-                                        ),
-                                    )
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_2_4))
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    fontFamily = arvo_bold,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_2_5))
-                            }
-                        })
-
-                    }
-
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color.Black,
-                                    fontSize = dpToSp(dp = 38.dp),
-                                    fontFamily = arvo_bold
-                                )
-                            ) {
-                                append(stringResource(id = R.string.text_splash_second_2_6))
-                            }
-                        },
-                        lineHeight = dpToSp(dp = 56.dp)
-                    )
-
                 }
             }
         }
@@ -760,6 +889,32 @@ fun SplashThird(navController: NavController?) {
         ) {
 
             val (icon, next, text1, text2, atom) = createRefs()
+
+            var text1Visibility by remember { mutableStateOf(false) }
+            var text2Visibility by remember { mutableStateOf(false) }
+            var buttonVisibility by remember { mutableStateOf(true) }
+            var atomVisibility by remember { mutableStateOf(true) }
+            var pressed by remember { mutableStateOf(false) }
+
+            LaunchedEffect(pressed) {
+                if (!pressed) {
+                    delay(1000)
+                    text1Visibility = true
+                    delay(350)
+                    text2Visibility = true
+                }
+                else {
+                    text1Visibility = false
+                    delay(350)
+                    text2Visibility = false
+                    delay(750)
+                    buttonVisibility = false
+                    delay(1000)
+                    atomVisibility = false
+                    delay(1000)
+                    navController?.navigate("splash_fourth")
+                }
+            }
 
             Row(modifier = Modifier.constrainAs(icon) {
                 centerHorizontallyTo(parent)
@@ -789,159 +944,181 @@ fun SplashThird(navController: NavController?) {
 
             val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.atom))
 
-            LottieAnimation(
-                modifier = Modifier
-                    .size(
-                        (356.68 * getScreenSize().width / 430).dp,
-                        ((385.12 * getScreenSize().height / 932)).dp
-                    )
-                    .constrainAs(atom) {
-                        centerHorizontallyTo(parent)
-                        centerVerticallyTo(parent, bias = 0.50f)
-                    }
-                    .alpha(0.5f),
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-
-            Button(onClick = { navController?.navigate("splash_fourth") },
-                shape = RoundedCornerShape(22.dp),
-                colors = ButtonDefaults.buttonColors(
-                    colorResource(R.color.app_green)
-                ),
-                modifier = Modifier
-                    .constrainAs(next) {
-                        bottom.linkTo(parent.bottom, margin = 24.dp)
-                        end.linkTo(parent.end, margin = 24.dp)
-                    }
-                    .defaultMinSize(minWidth = 96.dp, minHeight = 48.dp)
-                    .height(48.dp)) {
-
-                val imageLoaderRunning = ImageLoader.Builder(LocalContext.current).components {
-                    if (SDK_INT >= 28) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                }.build()
-
-                Image(
-                    painter = rememberAsyncImagePainter(R.drawable.running, imageLoaderRunning),
-                    contentScale = ContentScale.Fit,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp)
+            AnimatedVisibility(
+                visible = atomVisibility,
+                exit = fadeOut(),
+                modifier= Modifier.constrainAs(atom) {
+                    centerHorizontallyTo(parent)
+                    centerVerticallyTo(parent, bias = 0.53f)
+            }) {
+                LottieAnimation(
+                    modifier = Modifier
+                        .size(
+                            (356.68 * getScreenSize().width / 430).dp,
+                            ((385.12 * getScreenSize().height / 932)).dp
+                        )
+                        .alpha(0.5f),
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
                 )
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                Icon(
-                    painter = painterResource(id = R.drawable.arrow),
-                    contentDescription = null,
-                )
-
             }
 
-            Column(modifier = Modifier.constrainAs(text1) {
-                linkTo(icon.bottom, parent.bottom, bias = 0.15f)
-                start.linkTo(parent.start, margin = 12.dp)
-            }) {
 
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = arvo_bold,
-                                fontSize = dpToSp(dp = 38.dp),
-                            )
-                        ) {
-                            append(stringResource(id = R.string.text_splash_third_1_1))
+            AnimatedVisibility(visible = buttonVisibility, modifier = Modifier.constrainAs(next) {
+                bottom.linkTo(parent.bottom, margin = 24.dp)
+                end.linkTo(parent.end, margin = 24.dp)
+            }, enter = EnterTransition.None, exit = fadeOut()) {
+
+                Button(
+                    onClick = { pressed = true },
+                    shape = RoundedCornerShape(22.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        colorResource(R.color.app_green)
+                    ),
+                    modifier = Modifier
+
+                        .defaultMinSize(minWidth = 96.dp, minHeight = 48.dp)
+                        .height(48.dp)
+                ) {
+
+                    val imageLoaderRunning = ImageLoader.Builder(LocalContext.current).components {
+                        if (SDK_INT >= 28) {
+                            add(ImageDecoderDecoder.Factory())
+                        } else {
+                            add(GifDecoder.Factory())
                         }
-                    },
-                    lineHeight = dpToSp(dp = 56.dp)
-                )
+                    }.build()
 
-                Spacer(modifier = Modifier.padding(4.dp))
+                    Image(
+                        painter = rememberAsyncImagePainter(R.drawable.running, imageLoaderRunning),
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
+                    )
 
-                Row {
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow),
+                        contentDescription = null,
+                    )
+
+                }
+            }
+
+            AnimatedVisibility(
+                visible = text1Visibility, modifier = Modifier.constrainAs(text1) {
+                    linkTo(icon.bottom, parent.bottom, bias = 0.15f)
+                    start.linkTo(parent.start, margin = 12.dp)
+                },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column {
 
                     Text(
-                        text = stringResource(id = R.string.text_splash_third_1_2),
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = dpToSp(dp = 38.dp),
-                            fontFamily = arvo_bold
-                        ),
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontFamily = arvo_bold,
+                                    fontSize = dpToSp(dp = 38.dp),
+                                )
+                            ) {
+                                append(stringResource(id = R.string.text_splash_third_1_1))
+                            }
+                        },
                         lineHeight = dpToSp(dp = 56.dp)
                     )
 
                     Spacer(modifier = Modifier.padding(4.dp))
 
-                    Text(text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = arvo_bold,
+                    Row {
+
+                        Text(
+                            text = stringResource(id = R.string.text_splash_third_1_2),
+                            style = TextStyle(
+                                color = Color.Black,
                                 fontSize = dpToSp(dp = 38.dp),
-                                brush = Brush.linearGradient(
-                                    listOf(
-                                        Color(0xFF1FBBA8),
-                                        Color(0xFF65BD4D)
+                                fontFamily = arvo_bold
+                            ),
+                            lineHeight = dpToSp(dp = 56.dp)
+                        )
+
+                        Spacer(modifier = Modifier.padding(4.dp))
+
+                        Text(text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontFamily = arvo_bold,
+                                    fontSize = dpToSp(dp = 38.dp),
+                                    brush = Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF1FBBA8),
+                                            Color(0xFF65BD4D)
+                                        )
                                     )
                                 )
-                            )
-                        ) {
-                            append(stringResource(id = R.string.text_splash_third_1_3))
-                        }
-                    })
+                            ) {
+                                append(stringResource(id = R.string.text_splash_third_1_3))
+                            }
+                        })
+                    }
                 }
             }
 
-            Column(modifier = Modifier.constrainAs(text2) {
-                centerVerticallyTo(parent, bias = 0.75f)
-                start.linkTo(parent.start, margin = 12.dp)
-            }) {
+            AnimatedVisibility(
+                visible = text2Visibility, modifier = Modifier.constrainAs(text2) {
+                    centerVerticallyTo(parent, bias = 0.75f)
+                    start.linkTo(parent.start, margin = 12.dp)
+                },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column {
 
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = arvo_bold,
-                                fontSize = dpToSp(dp = 38.dp),
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontFamily = arvo_bold,
+                                    fontSize = dpToSp(dp = 38.dp),
+                                )
+                            ) {
+                                append(stringResource(id = R.string.text_splash_third_2_1))
+                            }
+                        },
+                        lineHeight = dpToSp(dp = 56.dp)
+                    )
+
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.digital),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(
+                                spToDpInt(84f).dp,
+                                spToDpInt(24f).dp
                             )
-                        ) {
-                            append(stringResource(id = R.string.text_splash_third_2_1))
-                        }
-                    },
-                    lineHeight = dpToSp(dp = 56.dp)
-                )
+                            .align(Alignment.Start)
+                    )
 
-                Spacer(modifier = Modifier.padding(4.dp))
+                    Spacer(modifier = Modifier.padding(4.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.digital),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(
-                            spToDpInt(84f).dp,
-                            spToDpInt(24f).dp
-                        )
-                        .align(Alignment.Start)
-                )
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = arvo_bold,
-                                fontSize = dpToSp(dp = 38.dp),
-                            )
-                        ) {
-                            append(stringResource(id = R.string.text_splash_third_2_2))
-                        }
-                    },
-                    lineHeight = dpToSp(dp = 56.dp)
-                )
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontFamily = arvo_bold,
+                                    fontSize = dpToSp(dp = 38.dp),
+                                )
+                            ) {
+                                append(stringResource(id = R.string.text_splash_third_2_2))
+                            }
+                        },
+                        lineHeight = dpToSp(dp = 56.dp)
+                    )
+                }
             }
         }
     }
@@ -952,13 +1129,17 @@ fun SplashFourth(context: Context?) {
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
 
-        Image(
-            painterResource(id = R.drawable.programming_langs_icons_back),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.5f
-        )
+        var backgroundVisible by remember { mutableStateOf(false) }
+
+        AnimatedVisibility(visible = backgroundVisible, enter = fadeIn(), exit = fadeOut()) {
+            Image(
+                painterResource(id = R.drawable.programming_langs_icons_back),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.1f
+            )
+        }
 
         ConstraintLayout(
             modifier = Modifier
@@ -968,83 +1149,137 @@ fun SplashFourth(context: Context?) {
 
             val (bicycle, next, icon, text1) = createRefs()
 
-            Row(modifier = Modifier.constrainAs(icon) {
-                centerHorizontallyTo(parent)
-                top.linkTo(parent.top, margin = 16.dp)
+            var animationVisible by remember { mutableStateOf(false) }
+            var iconVisible by remember { mutableStateOf(true) }
+            var textVisible by remember { mutableStateOf(false) }
+            var buttonVisible by remember { mutableStateOf(false) }
+            var pressed by remember { mutableStateOf(false) }
+
+            val activity = (LocalContext.current as? MainActivity)
+
+            LaunchedEffect(pressed) {
+                if (!pressed) {
+                    delay(1000)
+                    backgroundVisible = true
+                    delay(1000)
+                    animationVisible = true
+                    delay(200)
+                    textVisible = true
+                    delay(1000)
+                    buttonVisible = true
+                }
+                else {
+                    delay(500)
+                    animationVisible = false
+                    delay(500)
+                    textVisible = false
+                    delay(500)
+                    buttonVisible = false
+                    delay(1000)
+                    backgroundVisible = false
+                    delay(1000)
+                    iconVisible = false
+                    delay(1000)
+                    context?.getSharedPreferences("Bitcode", Context.MODE_PRIVATE)?.edit()
+                        ?.putBoolean("splash_shown", true)?.apply()
+                    startActivity(context!!, Intent(context, Questions::class.java), null)
+                    activity?.finish()
+                }
+            }
+
+            AnimatedVisibility(visible = iconVisible,
+                exit = fadeOut(),
+                modifier = Modifier.constrainAs(icon) {
+                    centerHorizontallyTo(parent)
+                    top.linkTo(parent.top, margin = 16.dp)
             }) {
+                Row {
 
-                Image(
-                    painter = painterResource(id = R.drawable.bitcode_icon),
-                    contentDescription = null,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(72.dp)
-                )
+                    Image(
+                        painter = painterResource(id = R.drawable.bitcode_icon),
+                        contentDescription = null,
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .size(72.dp)
+                    )
 
-                Spacer(modifier = Modifier.size(8.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.bitcode),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(115.09.dp, 23.35.dp)
-                )
+                    Image(
+                        painter = painterResource(id = R.drawable.bitcode),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .size(115.09.dp, 23.35.dp)
+                    )
+                }
             }
 
             val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.coding))
 
-            LottieAnimation(
+            AnimatedVisibility(
+                visible = animationVisible,
                 modifier = Modifier.constrainAs(bicycle) {
                     centerHorizontallyTo(parent)
                     centerVerticallyTo(parent, bias = 0.45f)
                 },
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-                renderMode = RenderMode.HARDWARE
-            )
-
-            val activity = (LocalContext.current as? MainActivity)
-
-            Button(onClick = {
-                context?.getSharedPreferences("Bitcode", Context.MODE_PRIVATE)?.edit()
-                    ?.putBoolean("splash_shown", true)?.apply()
-                startActivity(context!!, Intent(context, Questions::class.java), null)
-                activity?.finish()
-            },
-                shape = RoundedCornerShape(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    colorResource(R.color.app_green)
-                ),
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .wrapContentWidth()
-                    .constrainAs(next) {
-                        centerHorizontallyTo(parent)
-                        centerVerticallyTo(parent, bias = 0.9f)
-                    }) {
-                Text(
-                    text = stringResource(id = R.string.get_started),
-                    fontFamily = arvo_bold,
-                    fontSize = dpToSp(dp = 20.dp),
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                LottieAnimation(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                    renderMode = RenderMode.HARDWARE
                 )
             }
 
-            Text(
-                text = stringResource(id = R.string.text_splash_fourth_1_1),
-                fontSize = dpToSp(dp = 32.dp),
-                fontFamily = arvo_bold,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.constrainAs(text1) {
+            AnimatedVisibility(
+                visible = buttonVisible, modifier = Modifier
+                    .constrainAs(next) {
+                        centerHorizontallyTo(parent)
+                        centerVerticallyTo(parent, bias = 0.9f)
+                    },
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Button(
+                    onClick = { pressed = true },
+                    shape = RoundedCornerShape(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        colorResource(R.color.app_green)
+                    ),
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .wrapContentWidth()
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.get_started),
+                        fontFamily = arvo_bold,
+                        fontSize = dpToSp(dp = 18.dp),
+                        color = Color.White,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = textVisible, modifier = Modifier.constrainAs(text1) {
                     centerHorizontallyTo(parent)
                     centerVerticallyTo(parent, bias = 0.75f)
                 },
-                lineHeight = dpToSp(dp = 36.dp)
-            )
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.text_splash_fourth_1_1),
+                    fontSize = dpToSp(dp = 32.dp),
+                    fontFamily = arvo_bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+
+                    lineHeight = dpToSp(dp = 36.dp)
+                )
+            }
         }
     }
 }

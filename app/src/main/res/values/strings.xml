@@ -42,7 +42,7 @@
     <string name="answer_2_2_1">I\'d explain the recipe step by step, starting with picking the ingredients.</string>
     <string name="answer_2_2_2">I\'d draw a diagram of the sandwich-making process.</string>
     <string name="answer_2_2_3">I\'d show a video tutorial on sandwich making.</string>
-    <string name="field3">INTRODUCTION TO CODING</string>
+    <string name="field3">INTRODUCTION\nTO CODING</string>
     <string name="question_3_1">What is the purpose of variables in programming?</string>
     <string name="answer_3_1_1">They store and represent data that can change during program execution.</string>
     <string name="answer_3_1_2">They are used to perform complex mathematical operations.</string>
@@ -81,7 +81,7 @@
     <string name="submit">SUBMIT</string>
     <string name="lets_go">LET\'S GO</string>
     <string name="ok_message">Marvelous! Shall we begin\nour adventure by delving\ninto a bit of information\nabout you?</string>
-    <string name="start_message">Let\'s take a brief\nquiz to uncover\nyour educational\nstage!</string>
+    <string name="start_message">Let\'s take a brief quiz to uncover your educational stage!</string>
     <string name="progress">Progress</string>
     <string name="recent_courses">Recent courses</string>
     <string name="android_course">Android Basics In Kotlin</string>

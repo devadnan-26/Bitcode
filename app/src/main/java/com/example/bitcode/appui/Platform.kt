@@ -40,6 +40,7 @@ import com.example.bitcode.navigation.Courses
 import com.example.bitcode.navigation.Home
 import com.example.bitcode.navigation.Item
 import com.example.bitcode.navigation.ItemObject
+import com.example.bitcode.navigation.SearchView
 import com.example.bitcode.ui.theme.BitcodeTheme
 import com.example.bitcode.viewModels.PlatformViewModel
 import com.jakewharton.threetenabp.AndroidThreeTen
@@ -187,6 +188,7 @@ class Platform : ComponentActivity() {
                                 }) {
                             composable("Home") { Home(context = this@Platform, navController) }
                             composable("Courses") { Courses(context = this@Platform, navController) }
+                            composable("Search") { SearchView(context = this@Platform, navController) }
                         }
                     }
                 }
