@@ -2,7 +2,6 @@ package com.example.bitcode.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -68,7 +67,6 @@ fun Courses(context: ComponentActivity?, navController: NavController?) {
     ) {
         val listOfColors = listOf(Color(0xFF0053d5), Color(0xFFFFED50), Color(0xFFFF4D4D))
         val (coursesList, header, search, featured, featuredCourses) = createRefs()
-        val viewModel = context?.let { ViewModelProvider(it) }?.get(PlatformViewModel::class.java)
         var searchValue by remember { mutableStateOf(context?.getString(R.string.search_course)) }
         TextField(
             value = searchValue ?: "",
