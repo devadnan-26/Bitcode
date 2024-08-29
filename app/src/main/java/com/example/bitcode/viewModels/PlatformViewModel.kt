@@ -2,6 +2,7 @@ package com.example.bitcode.viewModels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.bitcode.Items.Items
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,15 +16,9 @@ class PlatformViewModel: ViewModel() {
 
     val cChosen = MutableLiveData(false)
 
-    val homeChosen = MutableLiveData(true)
+    val whichNavItemChosen = MutableLiveData(Items.Home)
 
     val chosenDate = MutableLiveData("")
-
-    val coursesChosen = MutableLiveData(false)
-
-    val bitcodeXChosen = MutableLiveData(false)
-
-    val profileChosen = MutableLiveData(false)
 
 
     private val _searchValue = MutableLiveData("")
@@ -60,23 +55,9 @@ class PlatformViewModel: ViewModel() {
         }
     }
 
-    fun changeItems(item: String) {
-        when (item) {
-            "Home" -> {if (homeChosen.value != true)  homeChosen.value = true; changeOtherValues("Home")}
-            "Courses" -> {if (coursesChosen.value != true)  coursesChosen.value = true; changeOtherValues("Courses")}
-            "BitcodeX" -> {if (bitcodeXChosen.value != true)  bitcodeXChosen.value = true; changeOtherValues("BitcodeX")}
-            "Profile" -> {if (profileChosen.value != true)  profileChosen.value = true; changeOtherValues("Profile")}
-        }
+    fun changeItem(item: Items) {
+        whichNavItemChosen.value = item
     }
-
-    private fun changeOtherValues(value: String) {
-        when (value) {
-            "Home" -> { coursesChosen.value = false; bitcodeXChosen.value = false; profileChosen.value = false}
-            "Courses" -> { homeChosen.value = false; bitcodeXChosen.value = false; profileChosen.value = false}
-            "BitcodeX" -> { coursesChosen.value = false; homeChosen.value = false; profileChosen.value = false}
-            "Profile" -> { coursesChosen.value = false; bitcodeXChosen.value = false; homeChosen.value = false}
-        }
-     }
     fun change(letter: String, value: Boolean) {
         when (letter) {
             "A" ->  {

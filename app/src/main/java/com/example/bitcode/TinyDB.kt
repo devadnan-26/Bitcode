@@ -97,7 +97,7 @@ class TinyDB(private val context: Context) {
     private fun saveBitmap(fullPath: String?, bitmap: Bitmap?): Boolean {
         if (fullPath == null || bitmap == null) return false
         var fileCreated = false
-        var bitmapCompressed = false
+        var bitmapCompressed: Boolean
         var streamClosed = false
         val imageFile = File(fullPath)
         if (imageFile.exists()) if (!imageFile.delete()) return false

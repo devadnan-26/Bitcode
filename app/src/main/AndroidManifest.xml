@@ -3,8 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-sdk tools:overrideLibrary="androidx.wear.compose.material"/>
+
     <application
-        android:name=".appui.MyApplication"
+        android:name=".activities.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,7 +17,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bitcode"
         tools:targetApi="34">
-        <activity android:name=".appui.MainActivity"
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token"/>
+        <activity android:name=".activities.Splash"
             android:theme="@style/Theme.Bitcode"
             android:exported="true"
             android:label="Bitcode">
@@ -24,8 +31,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".appui.Questions"/>
-        <activity android:name=".appui.Platform"/>
+        <activity android:name=".activities.Questions"
+            android:exported="true">
+            <intent-filter>
+                <data android:scheme="https" android:host="www.example.com" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.Platform"/>
+        <activity android:name=".activities.OnBoard"/>
     </application>
 
 </manifest>

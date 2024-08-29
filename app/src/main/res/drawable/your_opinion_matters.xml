@@ -1,0 +1,86 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1200dp"
+    android:height="943.6dp"
+    android:viewportWidth="1200"
+    android:viewportHeight="943.6">
+  <path
+      android:pathData="M464.9,691.5v-210c-39.5,0 -71.6,32 -71.6,71.6v105.2h-123.6c-18.4,0 -33.3,14.9 -33.3,33.3 0,15.6 10.8,28.8 25.4,32.3 -14.6,3.5 -25.4,16.6 -25.4,32.3 0,18.4 14.9,33.3 33.3,33.3 -18.4,0 -33.3,14.9 -33.3,33.3s14.9,33.3 33.3,33.3c-18.4,0 -33.3,14.9 -33.3,33.3s14.9,33.3 33.3,33.3h212.6v-33.3h54.2v-197.7h-71.6Z"
+      android:strokeWidth="0"
+      android:fillColor="#69abbe"/>
+  <path
+      android:pathData="M1200,660.3l-634.7,5.8l0,249.3l634.7,28.2l0,-283.3z"
+      android:strokeWidth="0"
+      android:fillColor="#2c3533"/>
+  <path
+      android:pathData="M531,677.6h34.3v225.9h-34.3z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M625.5,729.2c10.8,0 19.5,-8.7 19.5,-19.5s-8.7,-19.5 -19.5,-19.5 -19.5,8.7 -19.5,19.5 8.7,19.5 19.5,19.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M691.2,729.2c10.8,0 19.5,-8.7 19.5,-19.5s-8.7,-19.5 -19.5,-19.5 -19.5,8.7 -19.5,19.5 8.7,19.5 19.5,19.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M757,729.2c10.8,0 19.5,-8.7 19.5,-19.5s-8.7,-19.5 -19.5,-19.5 -19.5,8.7 -19.5,19.5 8.7,19.5 19.5,19.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M472.1,559.8l-43.5,0l0,-4.5l43.5,0l0,4.5l0,0z"
+      android:strokeWidth="0"
+      android:fillColor="#1a5260"/>
+  <path
+      android:pathData="M472.1,571.8l-43.5,0l0,-4.5l43.5,0l0,4.5l0,0z"
+      android:strokeWidth="0"
+      android:fillColor="#1a5260"/>
+  <path
+      android:pathData="M472.1,583.8l-43.5,0l0,-4.5l43.5,0l0,4.5l0,0z"
+      android:strokeWidth="0"
+      android:fillColor="#1a5260"/>
+  <path
+      android:pathData="M464.9,531.8h-34.1v-41.7c-1.5,0.8 -3,1.7 -4.5,2.7v43.5h38.6v-4.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#1a5260"/>
+  <path
+      android:pathData="M735.1,252v210c39.5,0 71.6,-32 71.6,-71.6v-105.2h123.6c18.4,0 33.3,-14.9 33.3,-33.3 0,-15.6 -10.8,-28.8 -25.4,-32.3 14.6,-3.5 25.4,-16.6 25.4,-32.3 0,-18.4 -14.9,-33.3 -33.3,-33.3 18.4,0 33.3,-14.9 33.3,-33.3s-14.9,-33.3 -33.3,-33.3c18.4,0 33.3,-14.9 33.3,-33.3s-14.9,-33.3 -33.3,-33.3h-212.6v33.3h-54.2v197.7h71.6Z"
+      android:strokeWidth="0"
+      android:fillColor="#e3542b"/>
+  <path
+      android:pathData="M0,283.3l634.7,-5.8l0,-249.3l-634.7,-28.2l0,283.3z"
+      android:strokeWidth="0"
+      android:fillColor="#2c3533"/>
+  <path
+      android:pathData="M634.7,40h34.3v225.9h-34.3z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M574.5,214.4c-10.8,0 -19.5,8.7 -19.5,19.5s8.7,19.5 19.5,19.5 19.5,-8.7 19.5,-19.5 -8.7,-19.5 -19.5,-19.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M508.8,214.4c-10.8,0 -19.5,8.7 -19.5,19.5s8.7,19.5 19.5,19.5 19.5,-8.7 19.5,-19.5 -8.7,-19.5 -19.5,-19.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M443,214.4c-10.8,0 -19.5,8.7 -19.5,19.5s8.7,19.5 19.5,19.5 19.5,-8.7 19.5,-19.5 -8.7,-19.5 -19.5,-19.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#f2f2f2"/>
+  <path
+      android:pathData="M727.9,383.8l43.5,0l0,4.5l-43.5,0l0,-4.5l0,0z"
+      android:strokeWidth="0"
+      android:fillColor="#7a3d2b"/>
+  <path
+      android:pathData="M727.9,371.8l43.5,0l0,4.5l-43.5,0l0,-4.5l0,0z"
+      android:strokeWidth="0"
+      android:fillColor="#7a3d2b"/>
+  <path
+      android:pathData="M727.9,359.8l43.5,0l0,4.5l-43.5,0l0,-4.5l0,0z"
+      android:strokeWidth="0"
+      android:fillColor="#7a3d2b"/>
+  <path
+      android:pathData="M735.1,411.8h34.1v41.7c1.5,-0.8 3,-1.7 4.5,-2.7v-43.5h-38.6v4.5Z"
+      android:strokeWidth="0"
+      android:fillColor="#7a3d2b"/>
+</vector>
